@@ -41,6 +41,7 @@ public class Main extends Application {
 	private SimpleDoubleProperty speed;
 	int player1_score, player2_score;
 	private Alert alert;
+	private boolean keyW, keyS, key8, key5;
 
 	@Override
 	public void start(Stage primaryStage) {
@@ -53,8 +54,6 @@ public class Main extends Application {
 			init_alert();
 
 			primaryStage.setScene(scene);
-			
-			// <div>Icons made by <a href="https://www.freepik.com/" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" 			    title="Flaticon">www.flaticon.com</a> is licensed by <a href="http://creativecommons.org/licenses/by/3.0/" 			    title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a></div>
 			primaryStage.getIcons().add(new Image("ping-pong.png"));
 			primaryStage.setTitle("Ping Pong");
 			primaryStage.show();
@@ -70,18 +69,34 @@ public class Main extends Application {
 		scene.setOnKeyPressed(e -> {
 			switch (e.getCode()) {
 
-			case NUMPAD8:
-				goUP_p2();
-				break;
-			case NUMPAD5:
-				goDOWN_p2();
-				break;
 			case W:
-				goUP_p1();
+				keyW = true;
 				break;
 			case S:
-				goDOWN_p1();
+				keyS = true;
 				break;
+			case NUMPAD8:
+				key8 = true;
+				break;
+			case NUMPAD5:
+				key5 = true;
+			default:
+				break;
+			}
+		});
+		scene.setOnKeyReleased(e -> {
+			switch (e.getCode()) {
+			case W:
+				keyW = false;
+				break;
+			case S:
+				keyS = false;
+				break;
+			case NUMPAD8:
+				key8 = false;
+				break;
+			case NUMPAD5:
+				key5 = false;
 			default:
 				break;
 			}
@@ -92,7 +107,8 @@ public class Main extends Application {
 		timer = new AnimationTimer() {
 			@Override
 			public void handle(long now) {
-				DO();
+				move_ball();
+				move_players();
 			}
 		};
 	}
@@ -126,27 +142,26 @@ public class Main extends Application {
 
 	public void init_alert() {
 		alert = new Alert(AlertType.INFORMATION, "Restart the game?", ButtonType.YES, ButtonType.NO);
-	    alert.setTitle("Game over");
-	    ((Stage)alert.getDialogPane().getScene().getWindow()).getIcons().add(new Image("ping-pong.png"));
-
+		alert.setTitle("Game over");
+		((Stage) alert.getDialogPane().getScene().getWindow()).getIcons().add(new Image("ping-pong.png"));
 	}
 
 	public void goUP_p1() {
 		ry = player1.getLayoutY();
-		if (ry >= speed.get() + 10)
-			player1.setLayoutY(ry - speed.get() - 10);
-	}
-
-	public void goUP_p2() {
-		ry = player2.getLayoutY();
-		if (ry >= speed.get() + 10)
-			player2.setLayoutY(ry - speed.get() - 10);
+		if (ry >= 10)
+			player1.setLayoutY(ry - 10);
 	}
 
 	public void goDOWN_p1() {
 		ry = player1.getLayoutY();
-		if (ry + player1.getHeight() <= pane.getHeight() - speed.get() - 10)
-			player1.setLayoutY(ry + speed.get() + 10);
+		if (ry + player1.getHeight() <= pane.getHeight() - 10)
+			player1.setLayoutY(ry + 10);
+	}
+
+	public void goUP_p2() {
+		ry = player2.getLayoutY();
+		if (ry >= 10)
+			player2.setLayoutY(ry - 10);
 	}
 
 	public void goDOWN_p2() {
@@ -155,7 +170,18 @@ public class Main extends Application {
 			player2.setLayoutY(ry + 10);
 	}
 
-	public void DO() {
+	public void move_players() {
+		if (keyW)
+			goUP_p1();
+		if (keyS)
+			goDOWN_p1();
+		if (key8)
+			goUP_p2();
+		if (key5)
+			goDOWN_p2();
+	}
+
+	public void move_ball() {
 		bx = ball.getLayoutX();
 		by = ball.getLayoutY();
 
@@ -201,18 +227,17 @@ public class Main extends Application {
 		}
 
 		// finish the game
-		if (player1_score == 2) {
+		if (player1_score == 10) {
 			System.out.println("player 1 won");
 			timer.stop();
 			alert.setHeaderText("Player 1 won");
 			alert.setOnHidden(evt -> showMessage());
 			alert.show();
 
-		} else if (player2_score == 2) {
+		} else if (player2_score == 10) {
 			System.out.println("player 2 won");
 			timer.stop();
 			alert.setHeaderText("Player 2 won");
-
 			alert.setOnHidden(evt -> showMessage());
 			alert.show();
 		}
